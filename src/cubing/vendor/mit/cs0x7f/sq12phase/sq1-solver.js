@@ -281,7 +281,12 @@ function Search_phase1(obj, shape, prunvalue, maxl, depth, lm) {
   var prunx;
   var shapex;
   if (prunvalue === 0 && maxl < 4) {
-    return maxl === 0 && Search_init2(obj);
+    stats.phase2_starts++;//<<<
+    let start_ms = performance.now();//<<<
+    const newLocal = maxl === 0 && Search_init2(obj);
+    let duration_ms = performance.now() - start_ms;//<<<
+    stats.phase2_duration_ms += duration_ms;//<<<
+    return newLocal;
   }
   if (lm !== 0) {
     shapex = Shape_TwistMove[shape];
@@ -473,8 +478,11 @@ function Search_solution(obj, c) {
     obj.Search_length1 < 100;
     ++obj.Search_length1
   ) {
-    //console.log(obj.Search_length1);
+    console.log("search_length1", obj.Search_length1);
     obj.Search_maxlen2 = Math.min(31 - obj.Search_length1, 17);
+    console.log(obj.Search_maxlen2);//<<<
+    stats.phase2_duration_ms = 0;//<<<
+    stats.phase2_starts = 0;//<<<
     if (
       Search_phase1(obj, shape, ShapePrun[shape], obj.Search_length1, 0, -1)
     ) {
@@ -912,6 +920,11 @@ var square1SolverGetRandomScramble = function () {
     pattern: randomPattern,
     scramble_string: scrambleString,
   };
+};
+
+export let stats = { //<<<
+  phase2_duration_ms: -2,
+  phase2_starts: -2,
 };
 
 export function getRandomSquare1ScrambleString() {
